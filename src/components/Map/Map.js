@@ -4,22 +4,22 @@ var boxpolys = null;
 var directions = null;
 var routeBoxer = null;
 var distance = null; 
+var directionService = null;
+var directionsRenderer = null;
 class Map extends Component {
     constructor(){
         super();
         this.state = {
-            map:null,
-            boxpolys:null,
-            directions:null,
-            routeBoxer:null,
-            distance:null,
-        };
+            origin:"seattle",
+            dest:"spokane",
+            radius:"3",
+        }
     }
-    componentWillMount() {
+    componentDidMount() {
         this.initialize();
     }
     // Clear boxes currently on the map
-    clearBoxes() {
+    clearBoxes = () => {
         if (boxpolys != null) {
             for (var i = 0; i < boxpolys.length; i++) {
                 boxpolys[i].setMap(null);
@@ -27,10 +27,10 @@ class Map extends Component {
         }
         boxpolys = null;
     }
-    drawBoxes(boxes) {
+    drawBoxes = (boxes) => {
         boxpolys = new Array(boxes.length);
         for (var i = 0; i < boxes.length; i++) {
-            boxpolys[i] = new google.maps.Rectangle({
+            boxpolys[i] = new window.google.maps.Rectangle({
                 bounds: boxes[i],
                 fillOpacity: 0,
                 strokeOpacity: 1.0,
@@ -40,54 +40,54 @@ class Map extends Component {
             });
         }
     }
-    route() {
+    route = () => {
         // Clear any previous route boxes from the map
-        clearBoxes();
+        this.clearBoxes();
 
         // Convert the distance to box around the route from miles to km
-        distance = parseFloat(document.getElementById("distance").value) * 1.609344;
+        distance = parseFloat(this.state.radius) * 1.609344;
 
         var request = {
-            origin: document.getElementById("from").value,
-            destination: document.getElementById("to").value,
-            travelMode: google.maps.DirectionsTravelMode.DRIVING
+            origin: this.state.origin,
+            destination:this.state.dest,
+            travelMode: window.google.maps.DirectionsTravelMode.DRIVING
         }
         // Make the directions request
-        directionService.route(request, function (result, status) {
-            if (status == google.maps.DirectionsStatus.OK) {
+        directionService.route(request, (result, status) => {
+            if (status == window.google.maps.DirectionsStatus.OK) {
                 directionsRenderer.setDirections(result);
 
                 // Box around the overview path of the first route
                 var path = result.routes[0].overview_path;
                 var boxes = routeBoxer.box(path, distance);
-                drawBoxes(boxes);
+                this.drawBoxes(boxes);
             } else {
                 alert("Directions query failed: " + status);
             }
         });
     }
-    initialize() {
+    initialize = () => {
         // Default the map view to the continental U.S.
         var mapOptions = {
-            center: new google.maps.LatLng(37.09024, -95.712891),
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            center: new window.google.maps.LatLng(37.09024, -95.712891),
+            mapTypeId: window.google.maps.MapTypeId.ROADMAP,
             zoom: 4
         };
-        map = new google.maps.Map(document.getElementById("map"), mapOptions);
-        routeBoxer = new RouteBoxer();
-        directionService = new google.maps.DirectionsService();
-        directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+        map = new window.google.maps.Map(document.getElementById("map"), mapOptions);
+        routeBoxer = new window.RouteBoxer();
+        directionService = new window.google.maps.DirectionsService();
+        directionsRenderer = new window.google.maps.DirectionsRenderer({ map: map });
     }
     render() {
         return (
             <div className="Map">
-                <div id="map" style="width: 800px; height: 600px;"></div>
+                <div id="map"></div>
                 Box within at least 
                 <input type="text" id="distance" value="30" size="2" />
                 miles of the route from 
-                <input type="text" id="from" value="denver" />
-                to <input type="text" id="to" value="dallas" />
-                <input type="submit" onClick={this.route()} />
+                <input type="text" id="from" value={this.state.origin} />
+                to <input type="text" id="to" value={this.state.dest} />
+                <input type="submit" onClick={this.route} /> 
             </div>
         );
     }
