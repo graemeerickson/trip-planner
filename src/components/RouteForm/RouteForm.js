@@ -22,10 +22,10 @@ class RouteForm extends Component {
 
   render() {
     return (
-      <div className="routeForm">
+      <div className="route-form">
         <form onSubmit={this.handleSubmit}>
           <br/>
-          <label>Origin: </label><input type="text" onChange={this.handleOriginLocationChange} /><br/>
+          <label>Start: </label><input type="text" onChange={this.handleOriginLocationChange} /><br/>
           <label>Destination: </label><input type="text" onChange={this.handleDestLocationChange} /><br/>
           <label>Distance radius (miles): </label><input type="text" onChange={this.handleRadiusDistanceChange} /><br/>
           <input type="submit" /><br/><br/>
