@@ -25,10 +25,37 @@ class RouteForm extends Component {
       <div className="route-form">
         <form onSubmit={this.handleSubmit}>
           <br/>
-          <label>Start: </label><input type="text" onChange={this.handleOriginLocationChange} /><br/>
-          <label>Destination: </label><input type="text" onChange={this.handleDestLocationChange} /><br/>
-          <label>Distance radius (miles): </label><input type="text" onChange={this.handleRadiusDistanceChange} /><br/>
-          <input type="submit" /><br/><br/>
+          <div className="form-inline trip-form-row row">
+            <div className="col-5">
+              <label>Start</label>
+            </div>
+            <div className="col-7">
+              <input className="form-control-sm form-input-box" type="text" onChange={this.handleOriginLocationChange} />
+            </div>
+          </div>
+          <div className="form-inline trip-form-row row">
+            <div className="col-5">
+              <label>Destination</label>
+            </div>
+            <div className="col-7">
+              <input className="form-control-sm form-input-box" type="text" onChange={this.handleDestLocationChange} />
+            </div>
+          </div>
+          <div className="form-inline trip-form-row row">
+            <div className="col-5">
+              <label>Radius (miles)</label>
+            </div>
+            <div className="col-7">
+              <input className="form-control-sm form-input-box" type="text" onChange={this.handleRadiusDistanceChange} />
+            </div>
+          </div>
+          <div className="form-group trip-form-row row">
+            <div className="col-5">
+            </div>
+            <div className="col-7">
+              <input className="btn btn-primary btn-sm trip-form-button" type="submit" value="Route" /><br/><br/>
+            </div>
+          </div>
         </form>
       </div>
     );
