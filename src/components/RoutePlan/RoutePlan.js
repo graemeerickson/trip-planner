@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 //React components
 import RouteForm from ".././RouteForm/RouteForm.js";
+import List from ".././List/List.js";
 import Map from ".././Map/Map.js";
 var map = null;
 var boxpolys = null;
@@ -20,6 +21,8 @@ class RoutePlan extends Component {
       dest: "",
       radius: "",
       miles: true,
+      locationData: [],
+      maxPOI:10,
     }
   }
   componentDidMount() {
@@ -72,8 +75,6 @@ class RoutePlan extends Component {
         // Box around the overview path of the first route
         var path = result.routes[0].overview_path;
         var boxes = routeBoxer.box(path, distance);
-        console.log(boxes);
-        //this.drawBoxes(boxes);
         this.searchBounds(boxes);
       } else {
         alert("Directions query failed: " + status);
@@ -95,19 +96,19 @@ class RoutePlan extends Component {
   }
   searchBounds = (bound) => {
     for (let i = 0; i < bound.length; i++) {
-      ((i) => {
-        setTimeout(() => {
-          this.performSearch(bound[i]);
-        }, i * 400);
-      })(i);
+        ((i) => {
+          setTimeout(() => {
+            this.performSearch(bound[i]);
+          }, i * 400);
+        })(i);
     }
   }
   performSearch = (bounds) => {
-    console.log("bounds", bounds);
     var request = {
       bounds: bounds,
       keyword: 'things to do'
     };
+
     service.radarSearch(request, this.callback);
   }
 
@@ -115,7 +116,7 @@ class RoutePlan extends Component {
     if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
       console.error(status);
       return;
-    }
+    }    
     for (var i = 0, result; result = results[i]; i++) {
       this.addMarker(result);
     }
@@ -133,7 +134,7 @@ class RoutePlan extends Component {
     });
 
     window.google.maps.event.addListener(marker, 'click', () => {
-      var request = { placeId: place.place_id };
+      let request = { placeId: place.place_id };
 
       service.getDetails(request, (result, status) => {
         if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
@@ -144,7 +145,24 @@ class RoutePlan extends Component {
         infoWindow.open(map, marker);
       });
     });
-    console.log(place);
+    let request = { placeId: place.place_id };
+    service.getDetails(request, (result, status) => {
+      if (status !== window.google.maps.places.PlacesServiceStatus.OK) {
+        console.error(status);
+        return;
+      }
+      let t = this.state.locationData;
+      t.push({
+        name:result.name,
+        id:place.place_id
+      });
+      this.setState({
+        locationData: t,
+      });
+      infoWindow.setContent(result.name);
+      infoWindow.open(map, marker);
+    });
+    console.log("plc", place);
   }
   getTripLocations = (originLocation, destLocation, distanceRadius) => {
     console.log('originLocation:', originLocation)
@@ -159,12 +177,23 @@ class RoutePlan extends Component {
   }
 
   render() {
-    return (
-      <section id="RoutePlan">
-        <RouteForm updateTripLocations={this.getTripLocations} />
-        <Map miles={this.state.miles} tripOrigin={this.state.origin} tripDest={this.state.dest} tripRadius={this.state.radius} destLocation={this.state.dest} />
-      </section>
-    );
+    console.log("LOCATION DATA", this.state.locationData);
+    if (this.state.locationData.length < 1) {
+      return (
+        <section id="RoutePlan">
+          <RouteForm updateTripLocations={this.getTripLocations} />
+          <Map miles={this.state.miles} tripOrigin={this.state.origin} tripDest={this.state.dest} tripRadius={this.state.radius} destLocation={this.state.dest} />
+        </section>
+      );
+    } else {
+      return (
+        <section id="RoutePlan">
+          <RouteForm updateTripLocations={this.getTripLocations} />
+          <Map miles={this.state.miles} tripOrigin={this.state.origin} tripDest={this.state.dest} tripRadius={this.state.radius} destLocation={this.state.dest} />
+          <List locationData={this.state.locationData} service={service} />
+        </section>
+      )
+    }
   }
 }
 
