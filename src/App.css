@@ -1,3 +1,7 @@
 .App {
   text-align: center;
 }
+#map{
+  width:800px;
+  height: 600px;
+}
